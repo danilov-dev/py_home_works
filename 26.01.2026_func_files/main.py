@@ -1,3 +1,9 @@
+def _create_default_file() -> str:
+    path_file = 'text_file.txt'
+    with open(path_file, mode='w', encoding='utf-8') as file:
+        file.write('Мама мыла раму')
+    return path_file
+
 def get_symbols_count(file_name: str) -> int:
     """
     Считает количество символов в текстовом файле
@@ -53,10 +59,14 @@ def cut_string(text: str) -> list[str] | str:
 path = input("Введите имя файла [default - 'text_file.txt']: \n"
              ">>>")
 if path == '':
-    path = 'text_file.txt'
+    path = _create_default_file()
+
 print(get_symbols_count(path))
 
 create_text_file("my_text_file.txt", "Первая строка")
 
 print(cut_string("программирование"))
 print(cut_string("мыло"))
+
+
+
