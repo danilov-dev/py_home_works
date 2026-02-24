@@ -62,7 +62,7 @@ def parse_data(soup):
                 "char_code": tds[1].text.strip(),
                 "count": tds[2].text.strip(),
                 "name": tds[3].text.strip(),
-                "rate": tds[4].text.strip().replace(',', '.')  # Заменяем запятую на точку для числового формата
+                "rate": tds[4].text.strip().replace(',', '.')
             }
             data.append(currency)
         except (IndexError, AttributeError) as e:
