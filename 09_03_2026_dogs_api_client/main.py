@@ -53,11 +53,11 @@ class DogsApiClient:
             response = requests.get(self.url, timeout=5)
             response.raise_for_status()
             data = response.json()
-            if data.get("message") and data.get('status') == "success":
-                img_link = data.get('message')
-                return img_link
-            else:
-                return ''
+            if not data.get("message") and data.get('status') == "success":
+                return None
+            img_link = data.get('message')
+            return img_link
+
         except Exception as e:
             print(f"Error: {e}")
             return None
@@ -229,5 +229,5 @@ if __name__ == "__main__":
     data_path = "dogs-data"
     service_builder = ServiceBuilder(base_url=base_url, data_path=data_path)
     dog_service = service_builder.get_dog_service()
-    image = dog_service.parse(img_count=20)
+    image = dog_service.parse(img_count=1)
     dog_service.save_changes()
