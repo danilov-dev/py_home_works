@@ -9,10 +9,11 @@ class EntityState(Enum):
     NEW = 1
     MODIFIED = 2
 
+
 class Dog:
     def __init__(self, breed: str, name: str, path: str = None):
-        self.breed:str = breed
-        self.name:str = name
+        self.breed: str = breed
+        self.name: str = name
         self.path: Optional[str] = path
         self.state = EntityState.UNCHANGED
         self._temp_image_data: Optional[bytes] = None
@@ -26,6 +27,7 @@ class Dog:
                 return image_file.read()
         else:
             raise ValueError("No image")
+
     def set_image(self, img_data: bytes):
         """Устанавливает новое изображение"""
         self._temp_image_data = img_data
@@ -71,7 +73,6 @@ class DogsApiClient:
         name = edited_url[3]
         return breed, name
 
-
     def get_image(self) -> Optional[dict]:
         if not self.url:
             return None
@@ -90,6 +91,7 @@ class DogsApiClient:
         except Exception as e:
             print(f"Error: {e}")
             return None
+
 
 class DogImageContext:
     def __init__(self, data_path: str = "dogs-data", batch_size: int = 100):
@@ -190,9 +192,8 @@ class DogImageContext:
         pass
 
 
-
 class DogService:
-    def __init__(self, client: DogsApiClient, data_context: DogImageContext ):
+    def __init__(self, client: DogsApiClient, data_context: DogImageContext):
         self.client = client
         self.context = data_context
 
@@ -215,7 +216,7 @@ class DogService:
 
 
 class ServiceBuilder:
-    def __init__(self, base_url:str, data_path:str):
+    def __init__(self, base_url: str, data_path: str):
         self.base_url = base_url
         self.data_path = data_path
 
@@ -223,6 +224,7 @@ class ServiceBuilder:
         api_client = DogsApiClient(self.base_url)
         context = DogImageContext(self.data_path)
         return DogService(api_client, context)
+
 
 if __name__ == "__main__":
     base_url = "https://dog.ceo/api/breeds/image/random"

@@ -2,13 +2,11 @@ from typing import Optional, List
 
 import requests
 
-def save_file():
-    pass
 
-def get_fact(url: str, headers: dict, facts_count: int = 10) -> Optional[List[str]]:
-    facts = []
+def get_fact(url: str, user_agent_headers: dict, facts_count: int = 10) -> Optional[List[str]]:
+    cat_facts = []
     for i in range(facts_count):
-        response = requests.get(url, headers=headers, timeout=10)
+        response = requests.get(url, headers=user_agent_headers, timeout=10)
         response.raise_for_status()
         if not response:
             continue
@@ -16,23 +14,22 @@ def get_fact(url: str, headers: dict, facts_count: int = 10) -> Optional[List[st
         if not data.get("fact"):
             return None
         fact = data.get('fact')
-        if fact in facts:
+        if fact in cat_facts:
             i -= 1
             continue
-        facts.append(fact)
-    return facts
+        cat_facts.append(fact)
+    return cat_facts
+
 
 def save_facts(file_name: str, facts: List[str]) -> None:
     if facts:
         try:
             with open(file_name, "w", encoding="utf-8") as f:
-                for i,fact in enumerate(facts):
+                for i, fact in enumerate(facts):
                     f.write(f"Факт №{i + 1}: {fact} \n")
             print(f"Файл facts.txt успешно сохранен")
         except Exception as e:
             print(f"Error: {e}")
-
-
 
 
 if __name__ == "__main__":
