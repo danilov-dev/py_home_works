@@ -97,7 +97,7 @@ def print_movies(movies: List[Movie], header: str) -> None:
     print('=' * 60)
 
 
-if __name__ == "__main__":  # ✅ Исправлено
+if __name__ == "__main__":
     Base.metadata.create_all(engine)
 
     repo = MovieRepository(SessionFactory)
