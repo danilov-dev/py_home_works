@@ -20,10 +20,15 @@ class MovieService:
             logger.error("Название не может быть пустым")
             raise ValueError("Название не может быть пустым")
 
-        new_movie = Movie(title=title, genre=genre, year=year, duration=duration, rating=rating)
+        new_movie = {'title': title,
+                     'genre': genre,
+                     'year': year,
+                     'duration': duration,
+                     'rating': rating
+                     }
         repo = MovieRepository(self.session_factory)
         try:
-            success = repo.add(new_movie)
+            success = repo.create_with_genre_name(new_movie)
             logger.info(f"Фильм '{title}' добавлен")
             return new_movie if success else None
         except SQLAlchemyError as e:
@@ -98,7 +103,7 @@ class MovieService:
         """Обновить жанр фильма"""
         try:
             repo = MovieRepository(self.session_factory)
-            movie = repo.update(movie_id, genre=genre)
+            movie = repo.full_update(movie_id, genre=genre)
             if movie is None:
                 raise ValueError(f"Фильм с ID: {movie_id} не найден")
             return movie
@@ -122,7 +127,7 @@ class MovieService:
         """Полное обновление фильма"""
         try:
             repo = MovieRepository(self.session_factory)
-            movie = repo.update(movie_id, **kwargs)
+            movie = repo.full_update(movie_id, **kwargs)
             if movie is None:
                 raise ValueError(f"Фильм с ID: {movie_id} не найден")
             return movie
@@ -133,7 +138,7 @@ class MovieService:
     def delete_by_id(self, movie_id: int) -> None:
         try:
             repo = MovieRepository(self.session_factory)
-            success = repo.delete_by_id(movie_id)
+            success = repo.delete(movie_id)
         except SQLAlchemyError as e:
             logger.error(e)
             raise
@@ -155,6 +160,3 @@ class MovieService:
         except SQLAlchemyError as e:
             logger.error(e)
             raise
-
-
-

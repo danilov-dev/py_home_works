@@ -1,5 +1,5 @@
-from typing import List, Optional
-from ..models import Movie
+from typing import List, Optional, Tuple
+from ..models import Movie, Genre
 
 
 class MovieViewer:
@@ -14,7 +14,7 @@ class MovieViewer:
             return
         print(f"ID: {movie.id}")
         print(f"Название: {movie.title}")
-        print(f"Жанр: {movie.genre}")
+        print(f"Жанр: {movie.genre.name}")
         print(f"Год: {movie.year}")
         print(f"Длительность: {movie.duration} мин.")
         print(f"Рейтинг: {movie.rating}")
@@ -27,7 +27,7 @@ class MovieViewer:
             return
         for m in movies:
             status = "В прокате" if m.is_available else "Снят"
-            print(f"[{m.id:2}] {m.title:<25} ({m.year}) | {m.genre:<10} | {m.rating} | {status}")
+            print(f"[{m.id:2}] {m.title:<25} ({m.year}) | {m.genre.name:<10} | {m.rating} | {status}")
         print(f"\nВсего: {len(movies)} фильм(ов)")
         print("=" * 60)
 
@@ -49,3 +49,8 @@ class MovieViewer:
         print(f"Средний рейтинг: {avg_rating:.2f}")
         print(f"Макс. рейтинг: {max_rating} | Мин. рейтинг: {min_rating}")
         print("=" * 60)
+
+    def print_genre_with_movie_count(self, genres:List[Tuple[Genre, int]]) -> None:
+        print("Количество фильмов по жанрам")
+        for genre, count in genres:
+            print(f"{genre.name}: {count}")
