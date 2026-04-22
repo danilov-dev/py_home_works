@@ -27,9 +27,9 @@ class Book(Base):
 class Reader(Base):
     __tablename__ = 'readers'
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    first_name: Mapped[String] = mapped_column(String(50), nullable=False)
-    last_name: Mapped[String] = mapped_column(String(50), nullable=False)
-    email: Mapped[String] = mapped_column(String(150),unique=True, nullable=False)
+    first_name: Mapped[str] = mapped_column(String(50), nullable=False)
+    last_name: Mapped[str] = mapped_column(String(50), nullable=False)
+    email: Mapped[str] = mapped_column(String(150),unique=True, nullable=False)
 
 class LibraryManager:
     def __init__(self, db_url: str):
@@ -50,12 +50,10 @@ class LibraryManager:
         return author
 
     def get_all_authors(self) -> Optional[List[Author]]:
-        try:
-            with self.session() as session:
-                authors = session.scalars(select(Author)).all()
-                return list(authors)
-        except Exception as e:
-            print(e)
+        with self.session() as session:
+            authors = session.scalars(select(Author)).all()
+            return list(authors)
+
 
     def get_author_by_id(self, id: int) -> Optional[Author]:
         with self.session() as session:
@@ -67,6 +65,7 @@ class LibraryManager:
             author = session.scalar(select(Author).where(Author.id == author_id))
             if not author:
                 print("Author not found")
+                return None
             author.name = new_name
             session.commit()
             return author
