@@ -1,109 +1,116 @@
-import logging
+import sys
 from library_app.services.library_manager import LibraryManager
 
-if __name__ == '__main__':
-    # Настройка логирования
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.FileHandler('app.log', encoding='utf-8'),
-            logging.StreamHandler()
-        ]
-    )
+def print_menu():
+    print("\n=== Меню библиотеки ===")
+    print("1. Добавить автора")
+    print("2. Добавить читателя")
+    print("3. Добавить книгу")
+    print("4. Выдать книгу")
+    print("5. Вернуть книгу")
+    print("6. Показать активные выдачи")
+    print("7. Найти книги по автору")
+    print("8. Показать все книги с авторами")
+    print("9. Удалить автора")
+    print("10. Удалить книгу")
+    print("11. Удалить читателя")
+    print("0. Выйти")
 
+def main():
     db_url = 'sqlite:///database.db'
     library = LibraryManager(db_url)
-
-    # Создаём таблицы
     library.create_tables()
-    print("База данных и таблицы готовы.\n")
+    print("База данных и таблицы готовы.")
 
-    # 1. Создание авторов
-    print("1. Создание авторов")
-    author1 = library.add_author("Филип Дик")
-    author2 = library.add_author("Артур Кларк")
-    print(f"   Создан: {author1.name} (ID: {author1.id})")
-    print(f"   Создан: {author2.name} (ID: {author2.id})\n")
+    while True:
+        print_menu()
+        choice = input("Выберите действие: ").strip()
 
-    # 2. Добавление книг
-    print("2. Добавление книг")
-    book1 = library.add_book(
-        title="Мечтают ли андроиды об электроовцах?",
-        author_id=author1.id,
-        year=1968,
-        isbn="978-0-575-07810-4"
-    )
-    book2 = library.add_book(
-        title="Космическая одиссея 2001 года",
-        author_id=author2.id,
-        year=1968,
-        isbn="978-0-451-45790-3"
-    )
-    print(f"   Добавлена: {book1.title} (Год: {book1.year}, Автор: {book1.author.name})")
-    print(f"   Добавлена: {book2.title} (Год: {book2.year}, Автор: {book2.author.name})\n")
+        try:
+            if choice == '0':
+                print("Завершение работы. До свидания!")
+                break
 
-    # 3. Поиск и обновление
-    print("3. Поиск и обновление книги")
-    found_book = library.find_book_by_id(book1.id)
-    print(f"   Найдена: {found_book.title} (Год: {found_book.year})")
+            elif choice == '1':
+                name = input("Введите имя автора: ").strip()
+                if not name:
+                    print("Ошибка: имя не может быть пустым.")
+                    continue
+                author = library.add_author(name)
+                print(f"Автор добавлен: {author.name} (ID: {author.id})")
 
-    updated = library.update_book(book1.id, new_year=1969)
-    print(f"   Обновлён год: '{updated.title}' -> {updated.year}")
+            elif choice == '2':
+                first = input("Имя читателя: ").strip()
+                last = input("Фамилия читателя: ").strip()
+                email = input("Email: ").strip()
+                if not all([first, last, email]):
+                    print("Ошибка: заполните все поля.")
+                    continue
+                reader = library.add_reader(first, last, email)
+                print(f"Читатель добавлен: {reader.first_name} {reader.last_name} (ID: {reader.id})")
 
-    library.update_book(book2.id, new_title="2001: Космическая одиссея", new_year=1969)
-    print("   Книга 2 обновлена (название и год).\n")
+            elif choice == '3':
+                title = input("Название книги: ").strip()
+                author_id = int(input("ID автора: "))
+                year = int(input("Год издания: "))
+                book = library.add_book(title, author_id, year)
+                print(f"Книга добавлена: {book.title} (ID: {book.id})")
 
-    # 4. Список всех книг
-    print("4. Все книги с авторами")
-    all_books = library.get_all_books()
-    for b in all_books:
-        print(f"   - {b.title} | {b.author.name} ({b.year})")
-    print()
+            elif choice == '4':
+                book_id = int(input("ID книги: "))
+                reader_id = int(input("ID читателя: "))
+                issue = library.issue_book_to_reader(book_id, reader_id)
+                print(f"Книга '{issue.book.title}' выдана читателю {issue.reader.first_name} {issue.reader.last_name}")
 
-    # 5. Читатели
-    print("5. Управление читателями")
-    reader = library.add_reader("Иван", "Петров", "ivan@test.com")
-    print(f"   Читатель создан: {reader.first_name} {reader.last_name} (ID: {reader.id})")
+            elif choice == '5':
+                issue_id = int(input("ID записи выдачи: "))
+                returned = library.return_book_from_reader(issue_id)
+                print(f"Книга '{returned.book.title}' возвращена {returned.return_date}")
 
-    library.update_reader(reader.id, new_email="ivan.petrov@newmail.com")
-    updated_reader = library.find_reader_by_id(reader.id)
-    print(f"   Email обновлён: {updated_reader.email}\n")
+            elif choice == '6':
+                issues = library.get_active_issues()
+                if not issues:
+                    print("Нет активных выдач.")
+                else:
+                    print("\n--- Активные выдачи ---")
+                    for iss in issues:
+                        print(f"  Запись #{iss.id}: '{iss.book.title}' -> {iss.reader.first_name} {iss.reader.last_name} (выдана: {iss.issue_date})")
 
-    # 6. Удаление
-    print("6. Удаление записей")
-    print(f"   Удаление книги: {book1.title} -> {library.delete_book(book1.id)}")
-    print(f"   Удаление автора: {author1.name} -> {library.delete_author(author1.id)}\n")
+            elif choice == '7':
+                author_name = input("Введите имя автора для поиска: ").strip()
+                books = library.find_books_by_author_name(author_name)
+                if not books:
+                    print("Книги данного автора не найдены.")
+                else:
+                    print(f"\nНайдено книг: {len(books)}")
+                    for b in books:
+                        print(f"  - {b.title} ({b.year})")
 
-    # === ТЕСТИРОВАНИЕ BookIssue ===
-    print("7. Тест выдачи книг (п. 1.4)")
-    try:
-        issue1 = library.issue_book_to_reader(book2.id, reader.id)
-        print(f"   Выдана: '{issue1.book.title}' -> {issue1.reader.first_name} {issue1.reader.last_name}")
-        print(f"      Дата выдачи: {issue1.issue_date}\n")
-    except ValueError as e:
-        print(f"   Ошибка: {e}\n")
+            elif choice == '8':
+                library.display_all_books_with_authors()
 
-    # Попытка выдать ту же книгу другому читателю
-    reader2 = library.add_reader("Мария", "Сидорова", "maria@test.com")
-    try:
-        library.issue_book_to_reader(book2.id, reader2.id)
-        print("   Книга выдана дважды (ошибка валидации!)")
-    except ValueError as e:
-        print(f"   Валидация сработала: {e}\n")
+            elif choice == '9':
+                author_id = int(input("ID автора для удаления: "))
+                library.delete_author(author_id)
+                print("Автор удалён.")
 
-    # === ТЕСТ ВОЗВРАТА И АКТИВНЫХ ВЫДАЧ ===
-    print("8. Тест возврата и активных выдач (п. 2.4)")
-    returned = library.return_book_from_reader(issue1.id)
-    print(f"   Книга возвращена. Дата возврата: {returned.return_date}\n")
+            elif choice == '10':
+                book_id = int(input("ID книги для удаления: "))
+                library.delete_book(book_id)
+                print("Книга удалена.")
 
-    active = library.get_active_issues()
-    print(f"Активные выдачи: {len(active)}")
-    if not active:
-        print("   (Нет активных выдач — все книги возвращены)")
-    else:
-        for act in active:
-            print(
-                f"   - '{act.book.title}' | Выдана: {act.issue_date} | {act.reader.first_name} {act.reader.last_name}")
+            elif choice == '11':
+                reader_id = int(input("ID читателя для удаления: "))
+                library.delete_reader(reader_id)
+                print("Читатель удалён.")
 
-    print("\nВсе тесты завершены!")
+            else:
+                print("Неверный выбор. Попробуйте снова.")
+
+        except ValueError as e:
+            print(f"Ошибка: {e}")
+        except Exception as e:
+            print(f"Неожиданная ошибка: {e}")
+
+if __name__ == '__main__':
+    main()
